@@ -1,0 +1,9 @@
+{
+  "name": "toldher-web",
+  "version": "1.0.0",
+  "description": "toldher® — brand portfolio site (HTML/CSS/JS, WebGL grass)",
+  "private": true,
+  "scripts": {
+    "start": "npx serve . -l 3000"
+  }
+}

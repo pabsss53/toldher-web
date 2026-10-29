@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>toldher® — a little weird looks good on you</title>
+  <meta name="description" content="toldher is a playful little world made for everyone who believes getting dressed should be fun. Cute things for curious minds, silly souls, and people who never quite outgrew their inner child.">
+  <meta name="theme-color" content="#7fc6ff">
+  <meta property="og:title" content="toldher® — a little weird looks good on you">
+  <meta property="og:description" content="A little less serious. A little more you.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="assets/img/og.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" type="image/png" href="assets/img/favicon.png">
+
+  <!-- kalau dibuka dobel-klik (file://), modul JS diblok browser. kasih tau user, jangan layar kosong -->
+  <script>if (location.protocol === 'file:') document.documentElement.classList.add('is-file');</script>
+
+  <link rel="preload" href="assets/fonts/bagel-fat-one-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/covered-by-your-grace-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ========== filter SVG: bikin garis "goyang" kayak gambar tangan ========== -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <filter id="boil" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence id="boilTurb" type="fractalNoise" baseFrequency="0.018 0.03" numOctaves="2" seed="3" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="7" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="boilSoft" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence id="boilTurb2" type="fractalNoise" baseFrequency="0.02 0.035" numOctaves="2" seed="8" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="3.5" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </svg>
+
+  <div class="file-warning" role="alert">
+    <b>Ups, jangan dobel-klik file ini.</b>
+    Buka lewat server lokal ya (browser nge-blok JS modul kalau lewat file://).<br>
+    Cara gampang: buka folder ini di terminal lalu jalankan <code>npx serve</code> atau <code>python3 -m http.server</code>,
+    terus buka <code>http://localhost:3000</code> / <code>:8000</code>. Detail ada di README.md.
+  </div>
+
+  <!-- ========== LOADER ========== -->
+  <div class="loader" id="loader" aria-live="polite">
+    <div class="loader__inner">
+      <img class="loader__logo" src="assets/img/logo-doodle.webp" alt="toldher" width="260" height="241">
+      <p class="loader__txt">watering the grass… <b id="loaderPct">0%</b></p>
+      <div class="loader__bar"><i id="loaderBar"></i></div>
+    </div>
+  </div>
+
+  <!-- crayon: jejak spidol di kursor + confetti doodle -->
+  <canvas id="crayon" aria-hidden="true"></canvas>
+  <div class="toast" id="toast" role="status"></div>
+
+  <!-- ========== NAV ========== -->
+  <header class="nav">
+    <a class="pill pill--logo" href="#top" data-wobble>toldher<span>®</span></a>
+    <nav class="nav__links" aria-label="Main">
+      <a class="pill" href="#cerita" data-wobble>about</a>
+      <a class="pill" href="#coretan" data-wobble>doodles</a>
+      <a class="pill" href="#lookbook" data-wobble>lookbook</a>
+      <a class="pill pill--white" href="#kontak" data-wobble>contact</a>
+    </nav>
+  </header>
+
+  <!-- ========== KANVAS RUMPUT (fixed, di belakang semua) ========== -->
+  <canvas id="grass" aria-hidden="true"></canvas>
+  <div class="grass-fx" aria-hidden="true"></div>
+
+  <main id="top">
+
+    <!-- ===================== STAGE: HERO + CERITA (rumput kelihatan) ===================== -->
+    <div class="stage" id="stage">
+
+      <section class="hero" id="hero">
+        <div class="hero__sticky">
+
+          <!-- cadangan kalau WebGL mati -->
+          <img class="hero__fallback" src="assets/img/logo-fuzzy.webp" alt="toldher" width="1157" height="287">
+          <h1 class="sr-only">toldher® — a little weird looks good on you</h1>
+
+          <div class="hero__bottom">
+          <p class="hero__tag"><span class="marker">a little weird looks good on you.</span>
+            <svg viewBox="0 0 60 60" width="46" height="46" aria-hidden="true"><path class="doodle-stroke" d="M8 50 L12 38 L44 8 Q50 4 54 10 Q58 16 52 20 L20 50 Z M38 14 L48 24" /></svg>
+          </p>
+
+          <div class="hero__cue" aria-hidden="true">
+            <span class="marker">scroll, it's fine</span>
+            <svg viewBox="0 0 40 70" width="34" height="60"><path class="doodle-stroke" d="M20 4 Q14 24 22 40 Q24 48 20 60 M8 48 L20 62 L32 46"/></svg>
+          </div>
+          </div>
+
+          <div class="hero__lines" aria-live="off">
+            <p class="hero__line" data-line="a">adult money,<br><u>kid</u> energy.</p>
+            <p class="hero__line" data-line="b">being normal<br>is overrated.</p>
+            <p class="hero__line" data-line="c">your inner child called.<br>it wants this.</p>
+          </div>
+
+          <div class="hero__ticker" aria-hidden="true">
+            <div class="ticker__track">
+              <span>we take cute very seriously ✿ not for sale yet, just showing off ✿ clothes for people who never grew up ♥</span>
+              <span>we take cute very seriously ✿ not for sale yet, just showing off ✿ clothes for people who never grew up ♥</span>
+              <span>we take cute very seriously ✿ not for sale yet, just showing off ✿ clothes for people who never grew up ♥</span>
+              <span>we take cute very seriously ✿ not for sale yet, just showing off ✿ clothes for people who never grew up ♥</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="cerita" id="cerita">
+        <div class="cerita__sticky">
+          <div class="blobwrap">
+            <svg class="blob" viewBox="0 0 800 560" preserveAspectRatio="none" aria-hidden="true">
+              <path id="blobShadow" fill="rgba(10,50,10,.22)" />
+              <path id="blobPath" fill="#fff7e2" />
+            </svg>
+            <div class="blob__content">
+              <p class="blob__label marker">(a little less serious. a little more you.)</p>
+              <p class="blob__text" id="blobText">toldher is a playful little world made for everyone who believes getting dressed should be fun. We make cute things for curious minds, silly souls, and people who never quite outgrew their inner child. No rules, no labels, no need to fit in. Just good clothes, good moods, and a little bit of weird.</p>
+            </div>
+            <!-- stiker doodle yang nempel di blob -->
+            <svg class="blob__sticker s1" viewBox="0 0 100 100" aria-hidden="true"><g class="doodle-fill"><path d="M50 12 L58 36 L84 36 L63 52 L71 78 L50 62 L29 78 L37 52 L16 36 L42 36 Z" fill="#ffe14d" stroke="#e08a00" stroke-width="5" stroke-linejoin="round"/></g></svg>
+            <svg class="blob__sticker s2" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 88 C6 56 14 14 48 34 C84 12 94 56 50 88Z" fill="#ff5c8a" stroke="#c2185b" stroke-width="5" stroke-linejoin="round"/></svg>
+            <svg class="blob__sticker s3" viewBox="0 0 100 100" aria-hidden="true"><g stroke="#2a5bd7" stroke-width="5" fill="#7ec8ff" stroke-linejoin="round"><ellipse cx="50" cy="22" rx="12" ry="18"/><ellipse cx="50" cy="78" rx="12" ry="18"/><ellipse cx="22" cy="50" rx="18" ry="12"/><ellipse cx="78" cy="50" rx="18" ry="12"/><circle cx="50" cy="50" r="12" fill="#ffe14d"/></g></svg>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ===================== CORETAN (hijau, pinned) ===================== -->
+    <section class="scribble" id="coretan">
+      <div class="edge edge--blades" aria-hidden="true"></div>
+      <div class="scribble__pin">
+
+
+        <!-- doodle: tiap satu <svg> = satu coretan. data-d = di beat mana dia "digambar" -->
+        <svg class="dd dd--spiral" viewBox="0 0 120 120" aria-hidden="true"><path class="draw" data-d="a" d="M63.6 60.0 L64.0 60.9 L64.2 62.0 L64.0 63.3 L63.5 64.5 L62.7 65.6 L61.4 66.6 L59.9 67.3 L58.2 67.6 L56.3 67.5 L54.4 66.9 L52.5 65.7 L51.0 64.2 L49.7 62.1 L49.0 59.8 L48.8 57.2 L49.3 54.5 L50.4 51.9 L52.1 49.5 L54.4 47.5 L57.3 46.1 L60.5 45.3 L63.9 45.3 L67.3 46.0 L70.6 47.6 L73.5 50.0 L75.9 53.1 L77.6 56.7 L78.4 60.8 L78.3 65.0 L77.1 69.2 L75.0 73.2 L72.0 76.6 L68.2 79.4 L63.7 81.3 L58.8 82.1 L53.8 81.8 L48.8 80.3 L44.2 77.6 L40.2 74.0 L37.1 69.4 L35.1 64.1 L34.2 58.4 L34.8 52.5 L36.6 46.8 L39.8 41.5 L44.2 37.0 L49.5 33.6 L55.6 31.4 L62.2 30.6 L68.9 31.3 L75.3 33.6 L81.2 37.3 L86.2 42.3 L90.0 48.5 L92.3 55.4 L93.1 62.8 L92.1 70.3 L89.4 77.5 L85.2 84.0 L79.4 89.5 L72.5 93.6 L64.7 96.1 L56.5 96.7 L48.2 95.5 L40.3 92.4 L33.1 87.6 L27.2 81.1 L22.8 73.4 L20.2 64.8 L19.6 55.7 L21.1 46.6 L24.7 38.0 L30.1 30.2 L37.3 23.8 L45.8 19.2 L55.2 16.5 L65.1 16.0 L75.1 17.8 L84.4 21.8 L92.7 27.8 L99.6 35.7 L104.5 45.0 L107.2 55.3 L107.6 66.1 L105.5 76.8 L101.1 86.8 L94.4 95.7 L85.8 103.0 L75.7 108.2"/></svg>
+        <svg class="dd dd--star" viewBox="0 0 100 100" aria-hidden="true"><path class="draw" data-d="a" d="M50.0 6.0 L62.3 35.1 L91.1 38.6 L69.7 58.4 L77.4 89.7 L50.0 70.9 L21.4 91.3 L31.4 58.0 L7.4 38.2 L37.6 34.9 Z"/></svg>
+        <svg class="dd dd--wave dd--w" viewBox="0 0 130 50" aria-hidden="true"><path class="draw" data-d="a" d="M5 26 q15 -26 30 0 q15 26 30 0 q15 -26 30 0 q9 14 25 0"/></svg>
+        <svg class="dd dd--squig" viewBox="0 0 130 60" aria-hidden="true"><path class="draw" data-d="b" d="M5 32 q12 -30 24 0 t24 0 t24 0 t24 0 t24 0"/></svg>
+        <svg class="dd dd--loop" viewBox="0 0 130 110" aria-hidden="true"><path class="draw" data-d="b" d="M70 12 C20 6 4 70 50 88 C96 106 130 60 100 30 C80 8 28 30 34 64 C38 84 70 82 76 60"/></svg>
+        <svg class="dd dd--arrow dd--w" viewBox="0 0 125 90" aria-hidden="true"><path class="draw" data-d="b" d="M8 74 C28 22 80 12 112 58 M90 56 L114 60 L110 34"/></svg>
+        <svg class="dd dd--zig" viewBox="0 0 115 48" aria-hidden="true"><path class="draw" data-d="c" d="M6 40 L26 8 L46 40 L66 8 L86 40 L106 8"/></svg>
+        <svg class="dd dd--heart dd--w" viewBox="0 0 100 100" aria-hidden="true"><path class="draw" data-d="c" d="M50 90 C4 58 8 12 46 32 C62 14 98 26 92 58 C88 74 70 82 50 90 Z"/></svg>
+        <svg class="dd dd--daisy dd--w" viewBox="0 0 100 100" aria-hidden="true"><g class="draw-g"><ellipse class="draw" data-d="c" cx="50" cy="50" rx="10" ry="10"/><ellipse class="draw" data-d="c" cx="50" cy="22" rx="9" ry="14"/><ellipse class="draw" data-d="c" cx="50" cy="78" rx="9" ry="14"/><ellipse class="draw" data-d="c" cx="22" cy="50" rx="14" ry="9"/><ellipse class="draw" data-d="c" cx="78" cy="50" rx="14" ry="9"/><ellipse class="draw" data-d="c" cx="30" cy="30" rx="9" ry="14" transform="rotate(-45 30 30)"/><ellipse class="draw" data-d="c" cx="70" cy="70" rx="9" ry="14" transform="rotate(-45 70 70)"/></g></svg>
+
+        <p class="scribble__small scribble__small--l"><span class="marker">clothes for people who never grew up.</span></p>
+        <p class="scribble__small scribble__small--r"><span class="marker">we dress feelings, not genders.</span></p>
+
+        <ul class="scribble__menu" aria-hidden="true">
+          <li>silly</li>
+          <li>curious</li>
+          <li>giggly</li>
+          <li>a little weird</li>
+          <li>inner child</li>
+          <svg class="ptr" viewBox="0 0 60 36" width="54" height="32"><path d="M4 18 L48 18 M34 6 L50 18 L34 30" fill="none" stroke="#ffe600" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </ul>
+
+        <div class="scribble__words">
+          <h2 class="scribble__word" data-beat="1"><span>a bit silly</span></h2>
+          <h2 class="scribble__word" data-beat="2"><span>a bit stylish</span></h2>
+          <h2 class="scribble__word" data-beat="3"><span>no rules, no labels</span></h2>
+        </div>
+
+        <figure class="polaroid pol-1">
+          <i class="tape"></i>
+          <img src="assets/img/photo-wall.webp" alt="Person facing a notice board, wearing a toldher tee covered in colorful doodles" loading="lazy" width="500" height="564">
+          <figcaption class="marker">main character, facing a wall.</figcaption>
+        </figure>
+        <figure class="polaroid pol-2">
+          <i class="tape tape--r"></i>
+          <img src="assets/img/photo-dark.webp" alt="Person seen from behind in a white toldher tee under a single spotlight" loading="lazy" width="500" height="564">
+          <figcaption class="marker">the spotlight is yours.</figcaption>
+        </figure>
+        <figure class="orange">
+          <img src="assets/img/sticker-orange.webp" alt="An orange held in a hand with a TOLD HER sticker" loading="lazy" width="360" height="406">
+          <figcaption class="marker">yes, an orange. don't ask.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ===================== PITA MARQUEE ===================== -->
+    <div class="ribbons" aria-hidden="true">
+      <div class="ribbon ribbon--a"><div class="ribbon__track">
+        <span>TOLDHER® ✿ A LITTLE WEIRD LOOKS GOOD ON YOU ✿ HAPPINESS LOOKS GOOD ON YOU ✿ </span><span>TOLDHER® ✿ A LITTLE WEIRD LOOKS GOOD ON YOU ✿ HAPPINESS LOOKS GOOD ON YOU ✿ </span><span>TOLDHER® ✿ A LITTLE WEIRD LOOKS GOOD ON YOU ✿ HAPPINESS LOOKS GOOD ON YOU ✿ </span><span>TOLDHER® ✿ A LITTLE WEIRD LOOKS GOOD ON YOU ✿ HAPPINESS LOOKS GOOD ON YOU ✿ </span>
+      </div></div>
+      <div class="ribbon ribbon--b"><div class="ribbon__track">
+        <span>IF ONLY Ü MISS ME ✿ WHERE HAVE U BEEN? ✿ WEAR SOMETHING THAT MAKES YOU GIGGLE ✿ </span><span>IF ONLY Ü MISS ME ✿ WHERE HAVE U BEEN? ✿ WEAR SOMETHING THAT MAKES YOU GIGGLE ✿ </span><span>IF ONLY Ü MISS ME ✿ WHERE HAVE U BEEN? ✿ WEAR SOMETHING THAT MAKES YOU GIGGLE ✿ </span><span>IF ONLY Ü MISS ME ✿ WHERE HAVE U BEEN? ✿ WEAR SOMETHING THAT MAKES YOU GIGGLE ✿ </span>
+      </div></div>
+    </div>
+
+    <!-- ===================== LOOKBOOK (geser samping) ===================== -->
+    <section class="lookbook" id="lookbook">
+      <div class="lb__pin">
+        <header class="lb__head">
+          <h2 class="lb__title">look<span>book</span></h2>
+          <p class="marker lb__hint">(keep scrolling, it slides on its own)</p>
+        </header>
+
+        <div class="lb__track" id="lbTrack">
+
+          <article class="card card--tall" style="--r:-3deg">
+            <div class="card__img"><img src="assets/img/tees-hills.webp" alt="Two white toldher tees, front and back, floating over grassy hills" loading="lazy" width="560" height="615"></div>
+            <p class="card__no">01</p>
+            <h3 class="card__title">if only ü miss me</h3>
+            <p class="card__cap marker">front: playing it cool. back: not cool at all.</p>
+          </article>
+
+          <article class="card card--photo" style="--r:2.5deg">
+            <div class="card__img"><img src="assets/img/photo-wall.webp" alt="Person facing a notice board in a toldher tee" loading="lazy" width="440" height="496"></div>
+            <p class="card__no">02</p>
+            <h3 class="card__title">facing the wall</h3>
+            <p class="card__cap marker">a wardrobe full of happy accidents.</p>
+          </article>
+
+          <article class="card card--dark" style="--r:-2deg">
+            <div class="card__img"><img src="assets/img/tee-back-dark.webp" alt="Back of a white toldher tee on a dark background covered in if only u miss me doodles" loading="lazy" width="400" height="588"></div>
+            <p class="card__no">03</p>
+            <h3 class="card__title">dark mode</h3>
+            <p class="card__cap marker">too grown for toys, too young at heart.</p>
+          </article>
+
+          <article class="card card--photo" style="--r:3deg">
+            <div class="card__img"><img src="assets/img/photo-dark.webp" alt="Person with their back to the camera under one spotlight" loading="lazy" width="440" height="496"></div>
+            <p class="card__no">04</p>
+            <h3 class="card__title">one spotlight</h3>
+            <p class="card__cap marker">for the weirdos with good taste.</p>
+          </article>
+
+          <article class="card card--orange" style="--r:-4deg">
+            <div class="card__img"><img src="assets/img/sticker-orange.webp" alt="An orange with a TOLD HER sticker" loading="lazy" width="380" height="429"></div>
+            <p class="card__no">05</p>
+            <h3 class="card__title">the orange</h3>
+            <p class="card__cap marker">wear something that makes you giggle.</p>
+          </article>
+
+          <article class="card card--end" style="--r:2deg">
+            <img class="card__logo" src="assets/img/logo-doodle.webp" alt="toldher doodle logo in rainbow marker" loading="lazy" width="360" height="334">
+            <p class="card__no">06</p>
+            <h3 class="card__title">that's it, for now</h3>
+            <p class="card__cap marker">more doodles on the way.</p>
+          </article>
+
+        </div>
+        <p class="lb__count"><b id="lbNow">01</b> / 06</p>
+        <div class="lb__bar"><i id="lbBar"></i></div>
+      </div>
+    </section>
+
+    <!-- ===================== DUA WARNA (putih -> merah) ===================== -->
+    <section class="warna" id="warna">
+      <div class="warna__pin">
+
+        <div class="warna__layer warna__layer--white">
+          <h2 class="warna__title">two colors,<br>one feeling.</h2>
+          <div class="warna__arts">
+            <figure><img src="assets/img/art-front-white.webp" alt="Front artwork, white colorway: silhouette and red TOLD HER lettering" width="520" height="463" loading="lazy"><figcaption class="marker">front</figcaption></figure>
+            <figure><img src="assets/img/art-back-white.webp" alt="Back artwork, white colorway: WHERE HAVE U BEEN?" width="520" height="463" loading="lazy"><figcaption class="marker">back</figcaption></figure>
+          </div>
+          <p class="warna__note marker">white, for the easy days →</p>
+        </div>
+
+        <div class="warna__layer warna__layer--red" id="warnaRed">
+          <h2 class="warna__title">two colors,<br>one feeling.</h2>
+          <div class="warna__arts">
+            <figure><img src="assets/img/art-front-red.webp" alt="Front artwork, red colorway: white silhouette and TOLD HER lettering" width="520" height="463" loading="lazy"><figcaption class="marker">front</figcaption></figure>
+            <figure><img src="assets/img/art-back-red.webp" alt="Back artwork, red colorway: WHERE HAVE U BEEN?" width="520" height="463" loading="lazy"><figcaption class="marker">back</figcaption></figure>
+          </div>
+          <p class="warna__note marker">red, for the loud feelings ♥</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== DROP: IF ONLY Ü MISS ME ===================== -->
+    <section class="drop" id="drop">
+      <div class="edge edge--scallop" aria-hidden="true"></div>
+      <div class="drop__grid">
+        <div class="drop__poster" id="dropPoster">
+          <img src="assets/img/tees-hills.webp" alt="Poster of two toldher tees over grassy hills with if only u miss me written in the sky" loading="lazy" width="720" height="791">
+          <img class="drop__art" src="assets/img/art-ifonly.webp" alt="if only u miss me doodle artwork" loading="lazy" width="300" height="291">
+        </div>
+        <div class="drop__copy">
+          <p class="marker drop__kicker">(oversized tee, hand-doodled)</p>
+          <h2 class="drop__title">if only<br>ü miss<br>me</h2>
+          <p class="drop__p">Two sides, two moods. Front: playing it cool. Back: not cool at all. Made to be worn loud, doodled on, and never explained.</p>
+          <button class="btn" id="wantBtn" type="button">i want it <span aria-hidden="true">✎</span></button>
+          <p class="drop__tiny">(go ahead, click. there is nothing to buy. yet.)</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== VERIFIKASI (captcha) ===================== -->
+    <section class="verify" id="verify">
+      <div class="verify__grid">
+        <img class="verify__img" id="captchaImg" src="assets/img/captcha.webp" alt="A captcha asking to select all images containing TOLD HER" loading="lazy" width="420" height="525">
+        <div class="verify__copy">
+          <h2 class="verify__title">quick<br>verification.</h2>
+          <p class="verify__p">are you actually into this, or just passing by?</p>
+          <div class="verify__btns">
+            <button class="btn btn--blue" type="button" data-answer="yes">actually into it</button>
+            <button class="btn btn--ghost" type="button" data-answer="no" id="noBtn">just passing by</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== FOOTER / KONTAK ===================== -->
+    <footer class="foot" id="kontak">
+      <div class="edge edge--blades" aria-hidden="true"></div>
+      <img class="foot__logo" id="footLogo" src="assets/img/logo-rainbow.webp" alt="toldher" loading="lazy" width="520" height="401">
+      <h2 class="foot__title"><span>not selling yet.</span> <span>happiness looks good on you.</span></h2>
+      <p class="foot__p">Want to know when we open? Say hi first.</p>
+      <ul class="foot__links">
+        <li><a class="pill pill--yellow" data-link="instagram" href="#kontak" data-wobble>instagram ↗</a></li>
+        <li><a class="pill pill--yellow" data-link="tiktok" href="#kontak" data-wobble>tiktok ↗</a></li>
+        <li><a class="pill pill--yellow" data-link="email" href="#kontak" data-wobble>email ↗</a></li>
+      </ul>
+      <img class="foot__banner" src="assets/img/banner-rainbow.webp" alt="" aria-hidden="true" loading="lazy" width="500" height="425">
+      <p class="foot__small">© 2026 toldher® — we take cute very seriously.</p>
+      <button class="foot__top marker" type="button" id="toTop">back to the grass ↑</button>
+    </footer>
+
+  </main>
+
+  <noscript><style>.loader{display:none}</style></noscript>
+
+  <!-- library lokal (nggak butuh internet / CDN) -->
+  <script src="vendor/gsap.min.js"></script>
+  <script src="vendor/ScrollTrigger.min.js"></script>
+  <script src="vendor/lenis.min.js"></script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
